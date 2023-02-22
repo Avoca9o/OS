@@ -1,0 +1,45 @@
+Домашнее задание по семинару 5
+Владимиров Дмитрий Андреевич, БПИ218
+
+Примечание: при запуске программы нужно вводить аргументы командной строки, 
+а именно имя именованного канала
+
+Для тестирования и понимания лучше открывать разные программы в разных терминалах
+
+Взаимодействие двух программ через именованные канал предполагается следующим образом:
+Пользователь в первой программе задает вопрос, который появляется во второй программе,
+там получается какой-то ответ, который прокидывается через тот же именованный канал обратно
+
+Демонстрация работы программы из двух терминалов
+
+Терминал 1 (для файла hw1.c):
+
+avo@avo-Yoga-Slim-7-14IIL05:~/OS/sem5$ gcc hw1.c -o hw1
+avo@avo-Yoga-Slim-7-14IIL05:~/OS/sem5$ ./hw1 buffer.fifo
+What do you want to answer? How old are you?
+Programm 2: Just a few seconds
+
+What do you want to answer? How much would be 2 + 2?
+Programm 2: 4
+
+What do you want to answer? Who are you?
+Programm 2: asdf
+
+What do you want to answer? ^C
+
+------------------------------------------------------------------------
+
+Терминал 2 (Для файла hw2.c):
+
+avo@avo-Yoga-Slim-7-14IIL05:~/OS/sem5$ gcc hw2.c -o hw2
+avo@avo-Yoga-Slim-7-14IIL05:~/OS/sem5$ ./hw2 buffer.fifo
+User1: How old are you?
+
+What can you answer? Just a few seconds
+User1: How much would be 2 + 2?
+
+What can you answer? 4
+User1: Who are you?
+
+What can you answer? asdf
+^C
