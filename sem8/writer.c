@@ -24,17 +24,17 @@ int main(int argc, char* argv[]) {
     size_t i = 0;
     FILE *buffer;
 
-    if ((sem_wr = sem_open(SWR, O_CREAT, 0666, 0)) == SEM_FAILED) {
+    if ((sem_wr = sem_open("/writersem", O_CREAT, S_IRUSR | S_IWUSR, 0)) == SEM_FAILED) {
         perror("Couldn't open semaphore writer");
         exit(1);
     }
 
-    if ((sem_r = sem_open(SR, O_CREAT, 0666, 0)) == SEM_FAILED) {
+    if ((sem_r = sem_open("/readersem", O_CREAT, S_IRUSR | S_IWUSR, 0)) == SEM_FAILED) {
         perror("Couldn't open semaphore reader");
         exit(1);
     }
+    
     while (i < size) {
-        sem_wait(sem_wr);
         if ((buffer = fopen("buffer.txt", "w")) < 0) {
             perror("Can't open file for writing");
             exit(1);
@@ -47,32 +47,26 @@ int main(int argc, char* argv[]) {
             buffered_text[5] = '\0';
             fprintf(buffer, "%s", buffered_text);
             fprintf(stdout, "Writer wrote %s\n", buffered_text);
-            fprintf(stdout, "ok\n");
             i += 5;
-            fprintf(stdout, "ok\n");
         } else {
             for (size_t j = 0; j < size - i; ++j) {
                 buffered_text[j] = argv[1][i + j];
             }
-            buffered_text[size - i] = '\0';
+            for (size_t j = size - i; j <= 5; ++j) {
+                buffered_text[j] = '\0';
+            }
             fprintf(buffer, "%s", buffered_text);
             fprintf(stdout, "Writer wrote %s\n", buffered_text);
             i = size;
         }
-        fprintf(stdout, "ok\n");
         fclose(buffer);
-        fprintf(stdout, "ok\n");
-        fprintf(stdout, "posting semaphore reader\n");
         sem_post(sem_r);
-        fprintf(stdout, "ok\n");
-        fprintf(stdout, "waiting for semaphort writer\n");
+        sem_wait(sem_wr);
     }
-    sem_wait(sem_wr);
-    if ((buffer = fopen("buffer.txt", "w")) != 0) {
+    if ((buffer = fopen("buffer.txt", "w")) < 0) {
         perror("Can't open file for writing");
         exit(1);
     }
-    sem_wait(sem_wr);
     fprintf(buffer, "exit\n");
     fclose(buffer);
     sem_post(sem_r);
@@ -81,4 +75,6 @@ int main(int argc, char* argv[]) {
     sem_close(sem_r);
     sem_unlink(SWR);
     sem_unlink(SR);
+    
+    fprintf(stdout, "\nall operations done\n");
 }
